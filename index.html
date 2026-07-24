@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="web-title">Memuat Undangan...</title>
+    
+    <meta property="og:title" id="meta-og-title" content="Undangan Resmi">
+    <meta property="og:description" id="meta-og-desc" content="Mengharap kehadiran Bapak/Ibu dalam acara resmi sekolah.">
+    <meta property="og:image" id="meta-og-img" content="">
+    <meta property="og:type" content="website">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* ========================================== */
+        /* 1. INITIAL SETUP & ATHALIA IDENTITY        */
+        /* ========================================== */
+        :root {
+            --navy: #0B315B;        /* Biru Navy Visual Identity Athalia */
+            --navy-dark: #051C36;   /* Navy Gelap untuk Gradasi */
+            --cerulean: #007BA7; 
+            --sage: #8DA082;
+            --earth-beige: #F5F2EA;
+            --clay: #B68D40; 
+            --white: #FFFFFF;
+            --slate: #475569;
+            --youtube-red: #D93025;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: #2D2A26;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            overflow-x: hidden;
+        }
+        
+        body.lock-scroll { overflow: hidden; height: 100vh; }
+
+        .phone-wrapper {
+            background-color: var(--earth-beige);
+            width: 100%;
+            max-width: 450px;
+            min-height: 100vh;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+            border-radius: 24px;
+            position: relative;
+            overflow: hidden; 
+        }
+
+        /* LOADING SCREEN */
+        #loading-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--earth-beige);
+            z-index: 10001;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.6s ease;
+        }
+
+        /* Spinner loading sederhana */
+        .spinner {
+            width: 40px; height: 40px;
+            border: 4px solid rgba(11, 49, 91, 0.1);
+            border-top: 4px solid var(--navy);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        section { padding: 45px 24px; position: relative; background-color: var(--white); margin-bottom: 12px; }
+        section:last-of-type { margin-bottom: 0; }
+
+        h1, h2, h3, h4 { font-family: 'Lora', serif; color: var(--navy); font-weight: 600; }
+        h2 { font-size: 24px; line-height: 1.3; }
+        p, li { color: var(--slate); font-size: 14.5px; line-height: 1.6; }
+
+        .motto-tag { color: var(--sage); font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; display: block; }
+
+        /* ========================================== */
+        /* 2. EFEK ANIMASI TEKS LIGHT RUNNING         */
+        /* ========================================== */
+        .shine-text {
+            background: linear-gradient(to right, var(--navy) 20%, var(--sage) 40%, var(--sage) 60%, var(--navy) 80%);
+            background-size: 200% auto;
+            color: var(--navy);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 4s linear infinite;
+            display: inline-block;
+        }
+
+        .shine-text-cover {
+            background: linear-gradient(to right, #ffffff 0%, #bae6fd 25%, #fef08a 50%, #bae6fd 75%, #ffffff 100%);
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 3s linear infinite; 
+            display: inline-block;
+            text-shadow: 0 0 12px rgba(255, 255, 255, 0.6);
+            filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.4)); 
+        }
+
+        @keyframes shine { to { background-position: 200% center; } }
+
+        /* ========================================== */
+        /* 3. COVER COMPONENT & VIDEO BACKGROUND      */
+        /* ========================================== */
+        .full-screen-cover {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%; z-index: 999;
+            display: flex; flex-direction: column; justify-content: space-between; align-items: center;
+            padding: 50px 24px 40px; text-align: center; color: white;
+            transition: opacity 1s ease, transform 1s ease;
+            background: radial-gradient(circle at center, var(--navy) 0%, var(--navy-dark) 100%); 
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .bg-video {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; 
+            z-index: 1; 
+            opacity: 0.55;
+            pointer-events: none;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(180deg, rgba(11, 49, 91, 0.2) 0%, rgba(5, 28, 54, 0.5) 100%); 
+            z-index: 2; 
+            pointer-events: none;
+        }
+
+        .cover-content { position: relative; z-index: 3; width: 100%; pointer-events: none; }
+
+        /* ========================================== */
+        /* 4. ANIMASI TOMBOL LINGKARAN (RIPPLE EFFECT)*/
+        /* ========================================== */
+        .gate-button-wrapper { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 20px; }
+
+        .btn-enter-gate {
+            position: relative;
+            width: 65px; height: 65px;
+            background: linear-gradient(135deg, rgba(11, 49, 91, 0.95) 0%, rgba(0, 123, 167, 0.85) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 10; color: var(--white);
+            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(11, 49, 91, 0.5);
+            pointer-events: none;
+        }
+        
+        .btn-enter-gate i { font-size: 20px; margin-left: 4px; }
+
+        .ripple-circle {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            animation: ripple-anim 2.5s infinite cubic-bezier(0.1, 0.6, 0.4, 1);
+            pointer-events: none;
+        }
+
+        .ripple-1 { animation-delay: 0s; }
+        .ripple-2 { animation-delay: 0.8s; }
+
+        @keyframes ripple-anim {
+            0% { width: 65px; height: 65px; opacity: 1; }
+            100% { width: 140px; height: 140px; opacity: 0; }
+        }
+
+        .gate-text { margin-top: 25px; font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: rgba(255, 255, 255, 0.85); font-weight: 500; }
+
+        /* ========================================== */
+        /* 5. ANIMASI TRANSISI ELEGAN                 */
+        /* ========================================== */
+        .animate-up { opacity: 0; transform: translateY(35px); transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1); }
+        .animate-up.show { opacity: 1; transform: translateY(0); }
+        .delay-100 { transition-delay: 100ms; }
+        .delay-200 { transition-delay: 200ms; }
+        .delay-300 { transition-delay: 300ms; }
+
+        /* ========================================== */
+        /* 6. COMPONENT PARTS (UI/UX ELEMENTS)        */
+        /* ========================================== */
+        .countdown-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 25px 0 10px; }
+        .countdown-card { background: var(--earth-beige); border: 1px solid rgba(141, 160, 130, 0.3); border-radius: 14px; padding: 12px 2px; text-align: center; box-shadow: 0 8px 16px rgba(0,0,0,0.03); }
+        .countdown-value { font-family: 'Lora', serif; font-size: 24px; font-weight: 700; color: var(--navy); display: block; }
+        .countdown-label { font-size: 10px; color: var(--sage); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+
+        .rundown-timeline { position: relative; margin-top: 25px; padding-left: 20px; }
+        .rundown-timeline::before { content: ''; position: absolute; left: 4px; top: 5px; bottom: 5px; width: 2px; background: linear-gradient(to bottom, var(--navy), var(--sage)); }
+        .rundown-timeline .rundown-item { position: relative; margin-bottom: 20px; padding-left: 15px; }
+        .rundown-dot { position: absolute; left: -21px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background-color: var(--earth-beige); border: 3px solid var(--sage); transition: transform 0.3s; }
+        .rundown-item.highlight .rundown-dot { border-color: var(--navy); transform: scale(1.15); }
+        .rundown-card-content { background: var(--earth-beige); padding: 14px 16px; border-radius: 12px; border-left: 4px solid var(--sage); }
+        .rundown-item.highlight .rundown-card-content { border-left-color: var(--navy); background: rgba(11, 49, 91, 0.05); }
+        .rundown-time { font-size: 12.5px; font-weight: 700; color: var(--navy); margin-bottom: 2px; }
+        .rundown-title { font-size: 14px; font-weight: 600; color: #1e293b; }
+
+        .btn-premium { background: linear-gradient(135deg, var(--navy) 0%, #051C36 100%); color: white !important; padding: 16px 24px; border-radius: 50px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600; font-size: 15px; width: 100%; box-shadow: 0 10px 20px rgba(11, 49, 91, 0.25); border: none; cursor: pointer; transition: all 0.3s ease; }
+        .btn-premium:active { transform: scale(0.98); }
+
+        .pulse-icon { animation: pulse-animation 1.8s infinite; }
+        @keyframes pulse-animation { 0% { transform: scale(0.95); opacity: 1; } 50% { transform: scale(1.15); opacity: 0.7; } 100% { transform: scale(0.95); opacity: 1; } }
+
+        .img-fluid { width: 100%; height: auto; border-radius: 16px; object-fit: cover; }
+
+        /* ========================================== */
+        /* 7. AUDIO BUTTON (POJOK KIRI ATAS PRESISI)  */
+        /* ========================================== */
+        .audio-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 450px; z-index: 1000; display: flex; justify-content: flex-start; padding-left: 20px; pointer-events: none; }
+        .btn-audio { pointer-events: auto; background: rgba(11, 49, 91, 0.4); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); color: var(--white); width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 4px 15px rgba(0,0,0,0.15); cursor: pointer; transition: all 0.3s ease; }
+        .btn-audio:active { transform: scale(0.9); }
+
+        /* ========================================== */
+        /* 8. TIMELINE CAROUSEL SLIDER STYLE          */
+        /* ========================================== */
+        .timeline-card { background: var(--earth-beige); border-radius: 20px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.02); padding: 14px; border: 1px solid rgba(141, 160, 130, 0.2); display: flex; flex-direction: column; margin-bottom: 25px; }
+        .timeline-card:last-child { margin-bottom: 0; }
+        .slider-container { position: relative; width: 100%; height: 180px; border-radius: 16px; overflow: hidden; background-color: #e2e8f0; }
+        .slider-wrapper { width: 100%; height: 100%; position: relative; }
+        .slider-wrapper .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.4s ease-in-out; border-radius: 16px; }
+        .slider-wrapper .slide.active { opacity: 1; }
+        .prev-btn, .next-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(11, 49, 91, 0.6); color: white; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; z-index: 5; transition: background 0.3s; }
+        .prev-btn:hover, .next-btn:hover { background: rgba(11, 49, 91, 0.85); }
+        .prev-btn { left: 10px; }
+        .next-btn { right: 10px; }
+        .dots-container { display: flex; justify-content: center; gap: 6px; margin-top: 12px; }
+        .dot { width: 7px; height: 7px; background-color: #cbd5e1; border-radius: 50%; cursor: pointer; transition: background-color 0.3s, transform 0.3s; }
+        .dot.active { background-color: var(--navy); transform: scale(1.2); }
+    </style>
+</head>
+<body class="lock-scroll">
+
+<audio id="bg-music" autoplay loop>
+    <source id="audio-source" src="" type="audio/wav">
+</audio>
+
+<div class="audio-container">
+    <button class="btn-audio" id="btn-audio-toggle" onclick="toggleAudio()">
+        <i class="fa-solid fa-volume-xmark" id="audio-icon"></i>
+    </button>
+</div>
+
+<div class="phone-wrapper">
+
+    <div id="loading-screen">
+        <div class="spinner"></div>
+        <p style="color: #64748b; font-weight: 500;">Menyiapkan Undangan Digital...</p>
+    </div>
+
+    <div id="welcome-gate" class="full-screen-cover" onclick="bukaUndanganDigital()">
+        <video id="bg-video" class="bg-video" playsinline autoplay muted loop>
+            <source id="video-source" src="" type="video/mp4">
+        </video>
+        <div class="video-overlay"></div>
+        
+        <div class="cover-content animate-up">
+            <img id="logo-top" src="" style="width: 75px; height: auto; display: block; margin: 0 auto 12px; filter: drop-shadow(0px 4px 8px rgba(0,0,0,0.4));" alt="Logo">
+            
+            <p id="sub-judul-1" style="color: #ffffff; font-size: 16px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);"></p>
+            <p id="sub-judul-2" style="color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);"></p>
+            
+            <h1 id="judul-opening" class="shine-text-cover" style="font-size: 26px; line-height: 1.2;"></h1>
+        </div>
+
+        <div class="cover-content animate-up delay-100" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; width: 100%; margin: auto 0;">
+            
+            <div style="background: rgba(0,0,0,0.3); padding: 14px 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(4px); width: 100%; max-width: 320px;">
+                <p style="color: #cbd5e1; font-size: 9.5px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px;">Kepada Yth. Bapak/Ibu</p>
+                <h3 style="color: white; font-size: 15px; font-family: 'Plus Jakarta Sans', sans-serif;" id="tamu-nama-cover">Orang Tua / Wali Murid</h3>
+            </div>
+
+            <div class="gate-text" style="font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: rgba(255, 255, 255, 0.9); font-weight: 600; text-shadow: 0 2px 4px rgba(0,0,0,0.6); margin-top: 2px;">
+                Ketuk Di Mana Saja Untuk Masuk
+            </div>
+
+        </div>
+
+        <div style="height: 20px; visibility: hidden;"></div>
+
+    </div> <section style="text-align: center; border-radius: 24px 24px 0 0; padding-top: 55px; background-image: url('https://www.transparenttextures.com/patterns/watercolor-paper.png');">
+        <div class="animate-up">
+            <span class="motto-tag">LOOKING BACK, MOVING FORWARD</span>
+            <h2 class="shine-text" id="motto-title"></h2>
+            <p id="motto-desc" style="margin: 15px 0 20px; font-size: 14px; color: var(--slate); padding: 0 10px;"></p>
+            
+            <div style="position: relative; width: 100%; padding-bottom: 56.25%; height: 0; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 24px rgba(0, 69, 124, 0.12); background-color: #000;">
+                <iframe id="youtube-embed" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            </div>
+            <p style="font-size: 11px; color: var(--sage); margin-top: 10px; font-style: italic;">Dokumentasi Sekolah Athalia</p>
+        </div>
+    </section>
+
+    <section style="background-color: var(--earth-beige);">
+    <div class="animate-up">
+        <span class="motto-tag">SIMPAN TANGGAL</span>
+        <h2 class="shine-text">Waktu dan Tempat</h2>
+        
+        <div style="background: var(--white); padding: 20px; border-radius: 16px; margin-top: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+            <p style="font-weight: 600; color: var(--navy); font-size: 15.5px;">
+                <i class="fa-regular fa-calendar-check" style="color: var(--sage); margin-right: 8px;"></i>
+                <span id="event-date"></span>
+            </p>
+            <p style="margin-top: 4px; font-size: 14px; padding-left: 24px; color: var(--slate); font-weight: 500;" id="event-time"></p>
+            
+            <p style="font-weight: 600; color: var(--navy); font-size: 15.5px; margin-top: 16px;">
+                <i class="fa-solid fa-map-location-dot" style="color: var(--sage); margin-right: 8px;"></i>
+                <span id="event-room"></span>
+            </p>
+            <p style="margin-top: 4px; font-size: 14px; padding-left: 24px; color: var(--slate);" id="event-building"></p>
+            <p style="font-size: 13px; padding-left: 24px; color: #64748b; font-style: italic; line-height: 1.4; margin-top: 2px;" id="event-address"></p>
+        </div>
+    </div>
+    
+    <div class="animate-up delay-100" style="background: var(--white); padding: 16px 20px; border-radius: 16px; margin-top: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); text-align: center;">
+    <p style="font-weight: 600; color: var(--navy); font-size: 15px; margin-bottom: 4px;">
+        <i class="fa-solid fa-shirt" style="color: var(--sage); margin-right: 8px;"></i>
+        <span>Busana / Dresscode</span>
+    </p>
+    <p id="protokol-pakaian-singkat" style="font-size: 14px; color: var(--slate); font-weight: 500; margin: 0;">
+        Bebas, Sopan, dan Rapi.
+    </p>
+</div>
+
+<div class="countdown-container animate-up delay-150">
+    <div class="countdown-card">
+        <span class="countdown-value" id="cd-days">00</span>
+        <span class="countdown-label">Hari</span>
+    </div>
+    <div class="countdown-card">
+        <span class="countdown-value" id="cd-hours">00</span>
+        <span class="countdown-label">Jam</span>
+    </div>
+    <div class="countdown-card">
+        <span class="countdown-value" id="cd-minutes">00</span>
+        <span class="countdown-label">Menit</span>
+    </div>
+    <div class="countdown-card">
+        <span class="countdown-value" id="cd-seconds">00</span>
+        <span class="countdown-label">Detik</span>
+    </div>
+</div>
+
+    <div id="rsvp-section" class="animate-up delay-200" style="background: var(--white); padding: 20px; border-radius: 16px; margin-top: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); text-align: center;">
+        <span class="motto-tag">KONFIRMASI</span>
+        <h2 class="shine-text" style="font-size: 20px; margin-top: 6px; margin-bottom: 8px;">Konfirmasi Kehadiran</h2>
+        
+        <p style="font-size: 13px; color: var(--slate); margin-top: 8px; margin-bottom: 18px; padding: 0 10px; line-height: 1.5;">
+            Silakan konfirmasi kehadiran Bapak/Ibu melalui link di bawah ini ⬇️
+        </p>
+
+        <a id="rsvp-link" href="https://docs.google.com/forms/d/1osEDkM8VRndGkT0N6l9BxgzAs0HDdYcSBpCN9g2vCsg/viewform?edit_requested=true" target="_blank" class="btn-action" style="background-color: var(--navy); color: var(--white); border: 1px solid var(--navy); font-size: 13px; padding: 14px 20px; border-radius: 12px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(11, 49, 91, 0.2); transition: all 0.3s ease;">
+            <i class="fa-solid fa-clipboard-check" style="color: var(--clay); font-size: 16px;"></i> Konfirmasi Kehadiran
+        </a>
+
+        <div style="margin-top: 18px; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px; padding: 10px 14px; display: inline-block;">
+            <p id="rsvp-deadline" style="font-size: 12px; color: #92400E; margin: 0; font-weight: 600;">
+                🗓️ RSVP paling lambat Kamis, 30 Juli 2026
+            </p>
+        </div>
+    </div>
+
+    <div id="poster-section" style="margin-top:25px; display:none;" class="animate-up delay-200">
+        <div style="background:var(--white); border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,.03); padding:12px; border:1px solid rgba(141,160,130,.15); text-align:center;">
+            <img id="poster-image" src="" alt="Poster Acara Utama" style="width:100%; max-width:450px; height:auto; border-radius:12px; display:block; margin:auto;">
+        </div>
+    </div>
+</section>
+
+    <section>
+        <div class="animate-up">
+            <span class="motto-tag">KEHIDUPAN DI SD ATHALIA</span>
+            <h2 class="shine-text">Perjalanan Pertumbuhan</h2>
+            <p style="margin-bottom: 25px; font-size: 14px; color: var(--slate);">Melihat proses pembentukan murid-murid di SD Athalia.</p>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+            
+            <div class="timeline-card animate-up" id="slider-card-1" style="display: none;">
+                <div class="slider-container">
+                    <div class="slider-wrapper" id="slides-1"></div>
+                    <button class="prev-btn" aria-label="Sebelumnya">&#10094;</button>
+                    <button class="next-btn" aria-label="Selanjutnya">&#10095;</button>
+                </div>
+                <div class="dots-container" id="dots-1"></div>
+                <div style="padding: 16px 4px 4px 4px;">
+                    <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 6px;" id="title-slider-1"></h4>
+                    <p style="font-size: 13.5px; color: var(--slate); text-align: justify;" id="desc-slider-1"></p>
+                </div>
+            </div>
+
+            <div class="timeline-card animate-up delay-100" id="slider-card-2" style="display: none;">
+                <div class="slider-container">
+                    <div class="slider-wrapper" id="slides-2"></div>
+                    <button class="prev-btn" aria-label="Sebelumnya">&#10094;</button>
+                    <button class="next-btn" aria-label="Selanjutnya">&#10095;</button>
+                </div>
+                <div class="dots-container" id="dots-2"></div>
+                <div style="padding: 16px 4px 4px 4px;">
+                    <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 6px;" id="title-slider-2"></h4>
+                    <p style="font-size: 13.5px; color: var(--slate); text-align: justify;" id="desc-slider-2"></p>
+                </div>
+            </div>
+
+            <div class="timeline-card animate-up delay-200" id="slider-card-3" style="display: none;">
+                <div class="slider-container">
+                    <div class="slider-wrapper" id="slides-3"></div>
+                    <button class="prev-btn" aria-label="Sebelumnya">&#10094;</button>
+                    <button class="next-btn" aria-label="Selanjutnya">&#10095;</button>
+                </div>
+                <div class="dots-container" id="dots-3"></div>
+                <div style="padding: 16px 4px 4px 4px;">
+                    <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 6px;" id="title-slider-3"></h4>
+                    <p style="font-size: 13.5px; color: var(--slate); text-align: justify;" id="desc-slider-3"></p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section style="background-color: var(--earth-beige);" id="rundown-section">
+        <div class="animate-up">
+            <span class="motto-tag">SUSUNAN ACARA</span>
+            <h2 class="shine-text">Susunan Acara Open House</h2>
+        </div>
+        
+        <div class="rundown-timeline" id="rundown-wrapper"></div>
+    </section>
+
+    <section id="youtube-section" style="text-align: center;">
+        <div class="animate-up">
+            <span class="motto-tag">VIRTUAL BROADCAST</span>
+            <h2 class="shine-text">Saksikan Secara Virtual</h2>
+            <p style="margin: 10px 0 20px; font-size: 14px; color: var(--slate);">
+                Bagi keluarga besar maupun kerabat yang tidak dapat hadir langsung di lokasi, prosesi acara dapat diikuti secara langsung melalui tautan di bawah ini.
+            </p>
+            
+            <a id="btn-youtube-live" href="" target="_blank" class="btn-premium" style="background: linear-gradient(135deg, var(--youtube-red) 0%, #b30000 100%); box-shadow: 0 10px 20px rgba(217, 48, 37, 0.2);">
+                <i class="fa-solid fa-circle-dot pulse-icon" style="color: white; font-size: 14px;"></i> NONTON LIVE STREAMING
+            </a>
+        </div>
+    </section>
+
+    <section id="ketentuan-section">
+        <div class="animate-up">
+            <span class="motto-tag">KETENTUAN EVENT</span>
+            <h2 class="shine-text">Protokol Pendamping</h2>
+            <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 12px;">
+                <div style="background: var(--earth-beige); padding: 16px; border-radius: 12px; border-left: 4px solid var(--navy); box-shadow: 0 4px 6px rgba(0,0,0,0.01);">
+                    <h4 style="font-size: 14px; color: var(--navy); font-weight: 600;"><i class="fa-solid fa-user-tie"></i> Pakaian Orang Tua</h4>
+                    <p style="font-size: 13px; margin-top: 4px; color: var(--slate); line-height: 1.5;" id="protokol-pakaian">
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="dokumentasi-section" style="background-color: var(--earth-beige);">
+        <div class="animate-up">
+            <span class="motto-tag">PORTAL KENANGAN</span>
+            <h2 class="shine-text">Unduh Dokumentasi Resmi</h2>
+            <p style="margin: 10px 0 22px; font-size: 14px; color: var(--slate);">Seluruh file dokumentasi dan dokumentasi acara dikumpulkan di folder ini.</p>
+            <a id="btn-gdrive" href="" target="_blank" class="btn-premium">
+                <i class="fa-solid fa-folder-open"></i> BUKA DRIVE DOKUMENTASI
+            </a>
+        </div>
+    </section>
+
+    <section id="map-section" style="background-color: var(--earth-beige); text-align: center; display: none;">
+    <div class="animate-up">
+        <span class="motto-tag">LOKASI</span>
+        <h2 class="shine-text" style="font-size: 20px; margin-bottom: 8px;">Peta Sekolah</h2>
+        
+        <div style="background: var(--white); padding: 24px 20px; border-radius: 16px; margin-top: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); text-align: center;">
+            <p style="font-size: 13.5px; color: var(--slate); margin-top: 0; margin-bottom: 18px; line-height: 1.5; padding: 0 10px;">
+                Klik tombol di bawah ini untuk melihat petunjuk arah lokasi Sekolah Athalia secara langsung di Google Maps.
+            </p>
+
+            <a id="map-link" href="#" target="_blank" class="btn-action" style="background-color: var(--navy); color: var(--white); border: 1px solid var(--navy); font-size: 13px; padding: 14px 22px; border-radius: 12px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(11, 49, 91, 0.2); transition: all 0.3s ease;">
+                <i class="fa-solid fa-location-dot" style="color: var(--clay); font-size: 16px;"></i> Buka Google Maps
+            </a>
+        </div>
+    </div>
+</section>
+
+    <section style="text-align: center;">
+        <div class="animate-up">
+            <span class="motto-tag">MARI TERHUBUNG</span>
+            <h2 class="shine-text">Kami Siap Membantu</h2>
+            <p style="margin-bottom: 20px; font-size: 14px; color: var(--slate);">Jika Bapak/Ibu memiliki pertanyaan atau ingin berdiskusi lebih lanjut, hubungi kami melalui:</p>
+            <a id="btn-wa" href="" target="_blank" class="btn-premium" style="background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); box-shadow: 0 10px 20px rgba(37, 211, 102, 0.2);">
+                <i class="fa-brands fa-whatsapp" style="font-size: 19px;"></i> <span id="wa-text">WhatsApp Panitia</span>
+            </a>
+        </div>
+    </section>
+
+    <section style="text-align: center; padding-bottom: 40px; background: none;">
+        <div class="animate-up">
+            <img id="logo-footer" src="" style="width: 70px; margin-bottom: 15px; opacity: 0.9;" alt="Logo Footer">
+            <h3 id="footer-school-name" style="font-size: 18px; margin-bottom: 4px; color: #94a3b8;"></h3>
+            <p id="footer-school-address" style="font-size: 12.5px; color: #94a3b8; line-height: 1.4; padding: 0 10px;"></p>
+        </div>
+    </section>
+
+    <section style="text-align: center; padding: 35px 24px 40px; background: none;">
+        <div class="animate-up">
+            <div style="padding: 0 10px;">
+                <a href="https://www.sekolahathalia.sch.id" target="_blank" class="btn-premium" style="background: linear-gradient(135deg, var(--navy) 0%, #002d52 100%); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 8px 16px rgba(11, 49, 91, 0.3);">
+                    <i class="fa-solid fa-house"></i> www.sekolahathalia.sch.id
+                </a>
+            </div>
+        </div>
+    </section>
+
+</div> </body>
+</html>>
+
+<script>
+    // =========================================================================
+    // 1. CONFIG & DEFAULT EVENT
+    // =========================================================================
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyAx13py4bkEN6mp8QxbhChRdSwZv8rbZ96nPlPSpv7-1KTufG0nwLdrmsjdDhYMPffIA/exec";
+
+    // Parsing ID Event & Nama Tamu dari parameter URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventId = urlParams.get('event') || 'PSB-SMP-2026';
+
+    // =========================================================================
+// 2. FETCH DATA DARI GOOGLE SHEET (GAS API)
+// =========================================================================
+async function loadDigitalInvitation() {
+    try {
+        const response = await fetch(`${WEB_APP_URL}?event=${eventId}`);
+        const data = await response.json();
+        
+        if (data.status === "success") {
+
+            // Isi semua data dari Google Sheet
+            applyConfig(data.config);
+
+            // --- TAMPILKAN / SEMBUNYIKAN FITUR ---
+            
+            // 1. Live Streaming YouTube
+            const youtubeSection = document.getElementById("youtube-section");
+            if (youtubeSection && data.config.tampilkanLinkYtStreaming && data.config.tampilkanLinkYtStreaming.toUpperCase() === "TIDAK") {
+                youtubeSection.style.display = "none";
+            }
+
+            // 2. Tombol Dokumentasi
+            const dokumentasiSection = document.getElementById("dokumentasi-section");
+            if (dokumentasiSection && data.config.tampilkanTombolDokumentasi && data.config.tampilkanTombolDokumentasi.toUpperCase() === "TIDAK") {
+                dokumentasiSection.style.display = "none";
+            }
+
+            // 3. Ketentuan Event
+            const ketentuanSection = document.getElementById("ketentuan-section");
+            if (ketentuanSection && data.config.tampilkanKetentuanEvent && data.config.tampilkanKetentuanEvent.toUpperCase() === "TIDAK") {
+                ketentuanSection.style.display = "none";
+            }
+
+            // 4. Poster Acara Utama
+            const posterSection = document.getElementById("poster-section");
+            const posterImage = document.getElementById("poster-image");
+            if (posterImage && data.config.posterUrl) {
+                posterImage.src = data.config.posterUrl;
+            }
+            if (posterSection) {
+                if (data.config.tampilkanPoster && data.config.tampilkanPoster.toUpperCase() === "TIDAK") {
+                    posterSection.style.display = "none";
+                } else if (data.config.posterUrl) {
+                    posterSection.style.display = "block";
+                }
+            }
+
+            // 5. KONTROL SECTION RSVP
+            const rsvpSection = document.getElementById("rsvp-section");
+            if (rsvpSection) {
+                const statusRsvp = (data.config["Tampilkan RSVP"] || data.config.tampilkanRsvp || "YA").toString().toUpperCase();
+                if (statusRsvp === "TIDAK") {
+                    rsvpSection.style.display = "none";
+                } else {
+                    rsvpSection.style.display = "block";
+                    
+                    // Update Link RSVP
+                    const link = data.config["Link RSVP"] || data.config.linkRsvp;
+                    const rsvpLinkEl = document.getElementById("rsvp-link");
+                    if (link && rsvpLinkEl) {
+                        rsvpLinkEl.href = link;
+                    }
+                    
+                    // Update Tenggat Waktu
+                    const tenggat = data.config["Dateline RSVP"] || data.config["Deadline RSVP"] || data.config.datelineRsvp || data.config.deadlineRsvp;
+                    const rsvpDeadlineEl = document.getElementById("rsvp-deadline");
+                    if (tenggat && rsvpDeadlineEl) {
+                        rsvpDeadlineEl.innerText = "🗓️ RSVP paling lambat " + tenggat;
+                    }
+                }
+            }
+            
+            // 6. KONTROL SECTION MAP GOOGLE (SUDAH DIPERBAIKI SANGAT RAPI)
+            const mapSection = document.getElementById("map-section");
+            const mapLink = document.getElementById("map-link");
+
+            if (mapSection && data.config) {
+                const rawStatus = data.config.tampilkanMap || data.config["Tampilkan Map"] || "";
+                const rawLink = data.config.linkMap || data.config["Link Map"] || "";
+
+                const statusMap = String(rawStatus).trim().toLowerCase();
+                const linkMap = String(rawLink).trim();
+
+                console.log("🔍 Status Map (tampilkanMap):", statusMap, "| Link Map (linkMap):", linkMap);
+
+                const isExplicitShow = statusMap === "ya" || statusMap === "y" || statusMap === "true";
+                const isExplicitHide = statusMap === "tidak" || statusMap === "t" || statusMap === "false" || linkMap.toLowerCase() === "tidak";
+                const hasValidLink = linkMap !== "" && linkMap !== "undefined" && linkMap !== "null" && linkMap.toLowerCase() !== "tidak";
+
+                if (isExplicitShow || (hasValidLink && !isExplicitHide)) {
+                    mapSection.style.display = "block";
+                    if (mapLink && hasValidLink) {
+                        mapLink.href = linkMap;
+                    }
+                } else {
+                    mapSection.style.display = "none";
+                }
+            }
+
+            // Isi Rundown Acara
+            applyRundown(data.rundown);
+
+            // Hilangkan Loading Screen
+            const loadingScreen = document.getElementById("loading-screen");
+            if (loadingScreen) {
+                loadingScreen.style.opacity = "0";
+                setTimeout(() => {
+                    loadingScreen.style.display = "none";
+                }, 600);
+            }
+
+        } else {
+            document.getElementById("loading-screen").innerHTML = `
+                <div style="text-align:center; padding: 20px;">
+                    <i class="fa-solid fa-circle-exclamation" style="font-size:40px; color:#ef4444;"></i>
+                    <p style="margin-top:15px; font-weight:600; color:var(--navy);">ID Undangan / Event Tidak Ditemukan</p>
+                </div>`;
+        }
+    } catch (error) {
+        console.error("Error fetching spreadsheet:", error);
+        document.getElementById("loading-screen").innerHTML = `
+            <div style="text-align:center; padding: 20px;">
+                <i class="fa-solid fa-triangle-exclamation" style="font-size:40px; color:#f59e0b;"></i>
+                <p style="margin-top:15px; font-weight:600; color:var(--navy);">Gagal Menghubungkan ke Database</p>
+                <p style="font-size:12px; color:#64748b;">Pastikan URL Deployment Web App GAS sudah diisi dan diakses publik.</p>
+            </div>`;
+    }
+}
+
+    
+    // =========================================================================
+    // 3. TERAPKAN KONFIGURASI KE TAMPILAN HTML
+    // =========================================================================
+    function applyConfig(config) {
+        // Browser Meta Title & Tags
+        document.title = config.judulEvent || "Official Invitation";
+        if(document.getElementById("web-title")) document.getElementById("web-title").innerText = config.judulEvent || "Official Invitation";
+        if(document.getElementById("meta-og-title")) document.getElementById("meta-og-title").setAttribute("content", config.judulEvent || "Official Invitation");
+        if(document.getElementById("meta-og-desc")) document.getElementById("meta-og-desc").setAttribute("content", config.subtitleEvent || "");
+        if(document.getElementById("meta-og-img")) document.getElementById("meta-og-img").setAttribute("content", config.logoCoverUrl || "");
+
+        // Media Aset (Lagu & Video)
+        if(document.getElementById("audio-source")) {
+            document.getElementById("audio-source").src = config.audioLatarUrl || "";
+            document.getElementById("bg-music").load();
+        }
+        if(document.getElementById("video-source")) {
+            document.getElementById("video-source").src = config.videoLatarCoverUrl || "";
+            document.getElementById("bg-video").load();
+        }
+
+        // Element Halaman Depan (Opening Gate)
+        if(document.getElementById("logo-top")) document.getElementById("logo-top").src = config.logoCoverUrl || "";
+        if(document.getElementById("sub-judul-1")) document.getElementById("sub-judul-1").innerText = config.judulEvent || "";
+        if(document.getElementById("sub-judul-2")) document.getElementById("sub-judul-2").innerText = config.subtitleEvent || "";
+        if(document.getElementById("judul-opening")) document.getElementById("judul-opening").innerHTML = config.judulCoverUtama || "";
+        
+        // [KOREKSI DI SINI]: Prioritaskan nama tamu dari URL (?to=)
+        const namaTamuFromUrl = urlParams.get('to');
+        if(document.getElementById("tamu-nama-cover")) {
+            document.getElementById("tamu-nama-cover").innerText = namaTamuFromUrl || config.kepadaYth || "Orang Tua / Wali Murid";
+        }
+
+        // Element Halaman Isi
+        if(document.getElementById("motto-title")) document.getElementById("motto-title").innerText = config.judulSambutan || "";
+
+        // ✅ Gunakan .innerHTML di sini agar tag HTML <strong> dibaca sebagai format BOLD
+        if(document.getElementById("motto-desc")) document.getElementById("motto-desc").innerHTML = config.teksSambutan || "";
+        
+        if (config.videoYoutubeEmbedId && document.getElementById("youtube-embed")) {
+            document.getElementById("youtube-embed").src = `https://www.youtube.com/embed/${config.videoYoutubeEmbedId}`;
+        }
+
+        // Lokasi, Alamat & Tanggal Event
+        if(document.getElementById("event-date")) document.getElementById("event-date").innerText = config.hariTanggal || "";
+        if(document.getElementById("event-time")) document.getElementById("event-time").innerText = config.waktuAcara || "";
+        if(document.getElementById("event-room")) document.getElementById("event-room").innerText = config.namaRuangan || "";
+        if(document.getElementById("event-building")) document.getElementById("event-building").innerText = config.namaGedung || "";
+        if(document.getElementById("event-address")) document.getElementById("event-address").innerText = config.alamatLengkap || "";
+
+        // WAKTU COUNTDOWN (Jalankan timer jika ada nilai tanggal)
+        if (config.waktuCountdown) {
+            runCountdown(config.waktuCountdown);
+        }
+
+        // Tampilkan Poster
+        if (config.fotoPosterUrl && document.getElementById("poster-image")) {
+            document.getElementById("poster-image").src = config.fotoPosterUrl;
+            document.getElementById("poster-section").style.display = "block";
+        }
+
+        // Render Slider Galeri
+        renderSlider(1, config.fotoSlider1UrlPisahkanKoma, config.judulSlider1, config.deskripsiSlider1);
+        renderSlider(2, config.fotoSlider2UrlPisahkanKoma, config.judulSlider2, config.deskripsiSlider2);
+        renderSlider(3, config.fotoSlider3UrlPisahkanKoma, config.judulSlider3, config.deskripsiSlider3);
+
+        initSliders();
+
+        // Button Links & Footer
+        if(document.getElementById("btn-youtube-live")) document.getElementById("btn-youtube-live").href = config.youtubeLiveUrl || "#";
+        if(document.getElementById("protokol-pakaian")) document.getElementById("protokol-pakaian").innerHTML = config.protokolPakaian || "Bebas, Sopan, dan Rapi.";
+        if(document.getElementById("btn-gdrive")) document.getElementById("btn-gdrive").href = config.gdriveDokumentasiUrl || "#";
+        if(document.getElementById("btn-wa")) document.getElementById("btn-wa").href = `https://wa.me/${config.nomorWaPanitia || ""}`;
+        if(document.getElementById("wa-text")) document.getElementById("wa-text").innerText = config.teksTombolWa || "WhatsApp Panitia";
+        
+        if(document.getElementById("logo-footer")) document.getElementById("logo-footer").src = config.logoFooterUrl || "";
+        if(document.getElementById("footer-school-name")) document.getElementById("footer-school-name").innerText = config.judulFooter || "";
+        if(document.getElementById("footer-school-address")) document.getElementById("footer-school-address").innerHTML = config.alamatFooter || "";
+    }
+
+    // =========================================================================
+    // 4. PERBAIKAN LOGIKA COUNTDOWN TIMER (PASTI BERJALAN)
+    // =========================================================================
+    var countdownInterval;
+    function runCountdown(targetDateString) {
+        if (countdownInterval) clearInterval(countdownInterval);
+        
+        if (!targetDateString) return;
+
+        let formattedStr = String(targetDateString).trim();
+        if (!formattedStr.includes("T") && formattedStr.includes("-")) {
+            formattedStr = formattedStr.replace(/-/g, "/");
+        }
+        
+        var targetDate = new Date(formattedStr).getTime();
+
+        if (isNaN(targetDate)) {
+            console.warn("Format tanggal countdown dari Google Sheet tidak valid:", targetDateString);
+            return;
+        }
+
+        function updateTimer() {
+            var now = new Date().getTime();
+            var distance = targetDate - now;
+            
+            if (distance < 0) {
+                clearInterval(countdownInterval);
+                if(document.getElementById("cd-days")) document.getElementById("cd-days").innerText = "00";
+                if(document.getElementById("cd-hours")) document.getElementById("cd-hours").innerText = "00";
+                if(document.getElementById("cd-minutes")) document.getElementById("cd-minutes").innerText = "00";
+                if(document.getElementById("cd-seconds")) document.getElementById("cd-seconds").innerText = "00";
+                return; 
+            }
+            
+            var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            if(document.getElementById("cd-days")) document.getElementById("cd-days").innerText = days < 10 ? "0" + days : days;
+            if(document.getElementById("cd-hours")) document.getElementById("cd-hours").innerText = hours < 10 ? "0" + hours : hours;
+            if(document.getElementById("cd-minutes")) document.getElementById("cd-minutes").innerText = minutes < 10 ? "0" + minutes : minutes;
+            if(document.getElementById("cd-seconds")) document.getElementById("cd-seconds").innerText = seconds < 10 ? "0" + seconds : seconds;
+        }
+
+        updateTimer();
+        countdownInterval = setInterval(updateTimer, 1000);
+    }
+
+    // =========================================================================
+    // 5. HELPER SLIDER & RUNDOWN
+    // =========================================================================
+    function renderSlider(sliderNum, imgUrlString, title, desc) {
+        const cardEl = document.getElementById(`slider-card-${sliderNum}`);
+        if (!cardEl) return;
+        if (!imgUrlString || !title) {
+            cardEl.style.display = 'none';
+            return;
+        }
+
+        const imgUrls = imgUrlString.split(',').map(url => url.trim()).filter(url => url !== '');
+        if (imgUrls.length === 0) {
+            cardEl.style.display = 'none';
+            return;
+        }
+        
+        if(document.getElementById(`title-slider-${sliderNum}`)) document.getElementById(`title-slider-${sliderNum}`).textContent = title;
+        if(document.getElementById(`desc-slider-${sliderNum}`)) document.getElementById(`desc-slider-${sliderNum}`).textContent = desc || '';
+        
+        const slidesContainer = document.getElementById(`slides-${sliderNum}`);
+        const dotsContainer = document.getElementById(`dots-${sliderNum}`);
+        if(!slidesContainer || !dotsContainer) return;
+
+        slidesContainer.innerHTML = '';
+        dotsContainer.innerHTML = '';
+        
+        imgUrls.forEach((url, index) => {
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = `${title} ${index + 1}`;
+            img.className = index === 0 ? 'slide active' : 'slide';
+            slidesContainer.appendChild(img);
+            
+            const dot = document.createElement('span');
+            dot.className = index === 0 ? 'dot active' : 'dot';
+            dotsContainer.appendChild(dot);
+        });
+        
+        cardEl.style.display = 'flex';
+    }
+
+    function applyRundown(rundownList) {
+        const wrapper = document.getElementById("rundown-wrapper");
+        if (!wrapper) return;
+        wrapper.innerHTML = "";
+        
+        if (!rundownList || rundownList.length === 0) {
+            if(document.getElementById("rundown-section")) document.getElementById("rundown-section").style.display = "none";
+            return;
+        }
+        
+        let html = '';
+        rundownList.forEach((item, index) => {
+            const highlightClass = item.highlight ? 'highlight' : '';
+            const delayTime = (index % 4) * 100;
+            
+            html += `
+                <div class="rundown-item ${highlightClass} animate-up delay-${delayTime}">
+                    <div class="rundown-dot"></div>
+                    <div class="rundown-card-content">
+                        <div class="rundown-time">${item.waktu}</div>
+                        <div class="rundown-title">${item.acara}</div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        wrapper.innerHTML = html;
+    }
+
+    // =========================================================================
+    // 6. AUDIO & COVER GATE CONTROLLER
+    // =========================================================================
+    var audio = document.getElementById("bg-music");
+    var audioIcon = document.getElementById("audio-icon");
+    if (audio) audio.volume = 0.7; 
+
+    function toggleAudio() {
+        if (!audio) return;
+        if (audio.paused) {
+            audio.play();
+            if(audioIcon) audioIcon.className = "fa-solid fa-volume-high";
+        } else {
+            audio.pause();
+            if(audioIcon) audioIcon.className = "fa-solid fa-volume-xmark";
+        }
+    }
+
+    function bukaUndanganDigital() {
+        var gate = document.getElementById("welcome-gate");
+        document.body.classList.remove("lock-scroll"); 
+        
+        if (gate) {
+            gate.style.opacity = "0";
+            gate.style.transform = "translateY(-100%)";
+            
+            setTimeout(function() {
+                gate.style.display = "none";
+                var elements = document.querySelectorAll('.animate-up');
+                elements.forEach(function(el) {
+                    el.classList.add('show');
+                });
+                
+                if (audio && audio.paused) {
+                    audio.play().then(function() {
+                        if(audioIcon) audioIcon.className = "fa-solid fa-volume-high";
+                    }).catch(function(err) {
+                        console.log("Autoplay diblokir browser.");
+                    });
+                }
+            }, 1000);
+        }
+    }
+
+    function initSliders() {
+        var cards = document.querySelectorAll('.timeline-card');
+        cards.forEach(function(card) {
+            var slides = card.querySelectorAll('.slide');
+            var dots = card.querySelectorAll('.dot');
+            var prevBtn = card.querySelector('.prev-btn');
+            var nextBtn = card.querySelector('.next-btn');
+            var currentSlide = 0;
+            
+            function showSlide(index) {
+                if (slides.length === 0) return;
+                slides[currentSlide].classList.remove('active');
+                if (dots.length > 0) dots[currentSlide].classList.remove('active');
+                
+                currentSlide = (index + slides.length) % slides.length;
+                
+                slides[currentSlide].classList.add('active');
+                if (dots.length > 0) dots[currentSlide].classList.add('active');
+            }
+            
+            if(nextBtn) {
+                nextBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    showSlide(currentSlide + 1);
+                });
+            }
+            
+            if(prevBtn) {
+                prevBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    showSlide(currentSlide - 1);
+                });
+            }
+            
+            dots.forEach(function(dot, dotIdx) {
+                dot.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    showSlide(dotIdx);
+                });
+            });
+        });
+    }
+
+    // Inisialisasi awal saat halaman dimuat
+    window.addEventListener('DOMContentLoaded', function() {
+        loadDigitalInvitation();
+        
+        var coverElements = document.querySelectorAll('#welcome-gate .animate-up');
+        coverElements.forEach(function(el) {
+            el.classList.add('show');
+        });
+    });
+</script>
+</body>
+</html>
